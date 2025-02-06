@@ -15,7 +15,7 @@ export default function handler(
 
   // Access your env variables on the server side
   const varOne = process.env.VAR_ONE;
-  const varTwo = process.env.VAT_TWO;
+  const varTwo = process.env.VAR_TWO;
 
   return res.status(200).json({
     varOne,
