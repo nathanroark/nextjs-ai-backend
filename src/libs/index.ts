@@ -112,13 +112,11 @@ const backupRecipes = [
   },
 ];
 
-// type Recipe = {
-//   name: string;
-//   ingredients: { name: string; amount: string }[];
-//   instructions: string[];
-// };
-//
-export const maxDuration = 30;
+type Recipe = {
+  name: string;
+  ingredients: { name: string; amount: string }[];
+  instructions: string[];
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -132,32 +130,34 @@ export default async function handler(
   }
 
   try {
-    const { object } = await generateObject({
-      model: openai("gpt-4o-mini"),
-      // temperature: 2.0,
-      maxRetries: 3,
-      maxTokens: 250,
-      // maxDuration: 30,
-      schema: z.object({
-        recipe: z.object({
-          name: z.string(),
-          ingredients: z.array(
-            z.object({ name: z.string(), amount: z.string() }),
-          ),
-          instructions: z.array(z.string()),
+    // Use timeout to prevent long waits
+    const timeout = 9000; // 8 seconds
+    const object = (await Promise.race([
+      generateObject({
+        model: openai("o3-mini"),
+        temperature: 0.5, // value <= 2
+        maxTokens: 100,
+        schema: z.object({
+          recipe: z.object({
+            name: z.string(),
+            ingredients: z.array(
+              z.object({ name: z.string(), amount: z.string() }),
+            ),
+            instructions: z.array(z.string()),
+          }),
         }),
+        prompt:
+          'Generate a unique, short cocktail recipe with up to 4 ingredients. Do not put the word "unique" in the name',
       }),
-      prompt:
-        "Generate a unique, short cocktail recipe with up to 5 ingredients",
-    });
+      new Promise((_, reject) => setTimeout(() => reject(), timeout)),
+    ])) as {
+      object: { recipe: Recipe };
+    };
 
-    return res.json(object);
-  } catch (error) {
-    console.error("OpenAI API Error:", error);
+    return res.json(object.object);
+  } catch {
     const fallback =
       backupRecipes[Math.floor(Math.random() * backupRecipes.length)];
     return res.json(fallback);
-    // res.status(500).json({ message: "Failed to generate cocktail." });
-    //
   }
 }
