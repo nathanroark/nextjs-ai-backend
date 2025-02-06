@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 interface EnvResponse {
-  secretKey?: string;
-  anotherVar?: string;
+  varOne?: string;
+  varTwo?: string;
 }
 
 export default function handler(
@@ -14,11 +14,11 @@ export default function handler(
   }
 
   // Access your env variables on the server side
-  const secretKey = process.env.MY_SECRET_KEY;
-  const anotherVar = process.env.ANOTHER_VAR;
+  const varOne = process.env.VAR_ONE;
+  const varTwo = process.env.VAT_TWO;
 
   return res.status(200).json({
-    secretKey,
-    anotherVar,
+    varOne,
+    varTwo,
   });
 }
