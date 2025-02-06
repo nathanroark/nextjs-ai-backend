@@ -30,7 +30,7 @@ export default async function handler(
         }),
       }),
       prompt:
-        "Generate a random good cocktail recipe. Try to make it unique enough so that you don't generate the same recipe too many times",
+        "Generate a random good cocktail recipe. Try to make it unique enough so that you don't generate the same recipe too many times. If you put a lot of fruit in it, don't also add simple syrup or anyting to make is more sweet",
     });
 
     return res.json(object);
