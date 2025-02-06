@@ -17,6 +17,7 @@ export default async function handler(
   try {
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
+      temperature: 1,
       schema: z.object({
         recipe: z.object({
           name: z.string(),
@@ -26,7 +27,7 @@ export default async function handler(
           instructions: z.array(z.string()),
         }),
       }),
-      prompt: "Generate a good cocktail recipe",
+      prompt: "Generate a random good cocktail recipe",
     });
 
     return res.json(object);
