@@ -3,6 +3,8 @@ import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod";
 
+export const maxDuration = 30; // This function can run for a maximum of 5 seconds
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -27,7 +29,8 @@ export default async function handler(
           instructions: z.array(z.string()),
         }),
       }),
-      prompt: "Generate a random good cocktail recipe",
+      prompt:
+        "Generate a random good cocktail recipe. Try to make it unique enough so that you don't generate the same recipe too many times",
     });
 
     return res.json(object);
