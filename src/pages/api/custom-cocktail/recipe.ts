@@ -1,3 +1,5 @@
+// pages/api/custom-cocktail/recipe.ts
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
@@ -18,12 +20,36 @@ export default async function handler(
   }
 
   try {
+    // Grab query params for spirit and ingredients
+    const spiritQuery = Array.isArray(req.query.spirit)
+      ? req.query.spirit[0]
+      : req.query.spirit || "";
+
+    const ingredientsQuery = Array.isArray(req.query.ingredients)
+      ? req.query.ingredients[0]
+      : req.query.ingredients || "";
+
+    // Convert comma-separated string into an array
+    const additionalIngredients = ingredientsQuery
+      .split(",")
+      .map((ing) => ing.trim())
+      .filter(Boolean);
+
+    // Build a dynamic prompt
+    let prompt = `Generate a unique, short cocktail recipe with up to 5 ingredients. 
+Use ${spiritQuery || "any spirit"} as the base spirit.`;
+
+    if (additionalIngredients.length > 0) {
+      prompt += ` Also try to incorporate some or all of these ingredients if they pair well: ${additionalIngredients.join(
+        ", ",
+      )}.`;
+    }
+
+    // Call the AI with the dynamic prompt
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
-      // temperature: 2.0,
       maxRetries: 3,
       maxTokens: 250,
-      // maxDuration: 30,
       schema: z.object({
         recipe: z.object({
           name: z.string(),
@@ -33,8 +59,7 @@ export default async function handler(
           instructions: z.array(z.string()),
         }),
       }),
-      prompt:
-        "Generate a unique, short cocktail recipe with up to 5 ingredients",
+      prompt,
     });
 
     return res.json(object);
@@ -43,7 +68,5 @@ export default async function handler(
     const fallback =
       backupRecipes[Math.floor(Math.random() * backupRecipes.length)];
     return res.json(fallback);
-    // res.status(500).json({ message: "Failed to generate cocktail." });
-    //
   }
 }

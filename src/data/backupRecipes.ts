@@ -1,13 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { openai } from "@ai-sdk/openai";
-import { generateObject } from "ai";
-import { z } from "zod";
-
-// export const maxDuration = 30; // This function can run for a maximum of 5 seconds
-//
+export type Recipe = {
+  name: string;
+  ingredients: { name: string; amount: string }[];
+  instructions: string[];
+};
 
 // Pre-generated backup recipes for fallback
-const backupRecipes = [
+export const backupRecipes = [
   {
     recipe: {
       name: "Old Fashioned",
@@ -34,6 +32,24 @@ const backupRecipes = [
         "Shake ingredients with ice.",
         "Strain into glass.",
         "Garnish with cherry.",
+      ],
+    },
+  },
+  {
+    recipe: {
+      name: "Fiery Margarita",
+      ingredients: [
+        { name: "Tequila", amount: "2 oz" },
+        { name: "Lime juice", amount: "1 oz" },
+        { name: "Agave syrup", amount: "0.5 oz" },
+        { name: "Jalapeño slices", amount: "2-3 slices" },
+        { name: "Ice", amount: "as needed" },
+      ],
+      instructions: [
+        "Muddle jalapeño slices with agave syrup in a shaker.",
+        "Add tequila, lime juice, and ice, then shake well.",
+        "Strain into a salt-rimmed glass over fresh ice.",
+        "Garnish with a jalapeño slice.",
       ],
     },
   },
@@ -111,53 +127,3 @@ const backupRecipes = [
     },
   },
 ];
-
-type Recipe = {
-  name: string;
-  ingredients: { name: string; amount: string }[];
-  instructions: string[];
-};
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  res.setHeader("Access-Control-Allow-Origin", "*"); // Allow all origins (for development)
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method !== "GET") {
-    return res.status(405).json({ message: "Method Not Allowed" });
-  }
-
-  try {
-    // Use timeout to prevent long waits
-    const timeout = 9000; // 8 seconds
-    const object = (await Promise.race([
-      generateObject({
-        model: openai("o3-mini"),
-        temperature: 0.5, // value <= 2
-        maxTokens: 100,
-        schema: z.object({
-          recipe: z.object({
-            name: z.string(),
-            ingredients: z.array(
-              z.object({ name: z.string(), amount: z.string() }),
-            ),
-            instructions: z.array(z.string()),
-          }),
-        }),
-        prompt:
-          'Generate a unique, short cocktail recipe with up to 4 ingredients. Do not put the word "unique" in the name',
-      }),
-      new Promise((_, reject) => setTimeout(() => reject(), timeout)),
-    ])) as {
-      object: { recipe: Recipe };
-    };
-
-    return res.json(object.object);
-  } catch {
-    const fallback =
-      backupRecipes[Math.floor(Math.random() * backupRecipes.length)];
-    return res.json(fallback);
-  }
-}
