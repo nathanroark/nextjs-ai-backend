@@ -12,22 +12,6 @@ export default async function handler(
   }
 
   try {
-    //
-    // const exampleResponseFromGpt = {
-    //   name: "Bad Cocktail",
-    //   ingredients: [
-    //     "1 oz vodka",
-    //     "1 oz gin",
-    //     "1 oz rum",
-    //     "1 oz tequila",
-    //     "1 oz triple sec",
-    //     "1 oz sweet and sour mix",
-    //     "1 oz cola",
-    //   ],
-    //   instructions:
-    //     "Mix all ingredients together in a shaker with ice. Strain into a glass and serve.",
-    // };
-
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
       schema: z.object({
