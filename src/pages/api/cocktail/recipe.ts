@@ -39,7 +39,7 @@ export default async function handler(
           instructions: z.array(z.string()),
         }),
       }),
-      prompt: "Generate a terrible cocktail recipe",
+      prompt: "Generate a good cocktail recipe",
     });
 
     return res.json(object);
