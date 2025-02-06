@@ -19,7 +19,7 @@ export default async function handler(
   try {
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
-      temperature: 1,
+      // temperature: 2, // value <= 2
       schema: z.object({
         recipe: z.object({
           name: z.string(),
@@ -30,7 +30,7 @@ export default async function handler(
         }),
       }),
       prompt:
-        "Generate a random good cocktail recipe. Try to make it unique enough so that you don't generate the same recipe too many times. If you put a lot of fruit in it, don't also add simple syrup or anyting to make is more sweet",
+        "Generate a random good cocktail recipe. Try to make it unique enough so that you don't generate the same recipe too many times.",
     });
 
     return res.json(object);
