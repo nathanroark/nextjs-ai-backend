@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
-
 import { z } from "zod";
 
 export default async function handler(
@@ -30,7 +29,7 @@ export default async function handler(
     // };
 
     const { object } = await generateObject({
-      model: openai("o3-mini"),
+      model: openai("gpt-4o-mini"),
       schema: z.object({
         recipe: z.object({
           name: z.string(),
